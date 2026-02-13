@@ -12,7 +12,7 @@
  * ---------------------------------------------------------------------------------
  */
 
-// Source: ../sanity.schema.json
+// Source: ..\sanity.schema.json
 export type PageReference = {
   _ref: string
   _type: 'reference'
@@ -29,7 +29,7 @@ export type PostReference = {
 
 export type Link = {
   _type: 'link'
-  linkType?: 'href' | 'page' | 'post'
+  linkType: 'href' | 'page' | 'post'
   href?: string
   page?: PageReference
   post?: PostReference
@@ -125,62 +125,6 @@ export type Button = {
   link?: Link
 }
 
-export type Settings = {
-  _id: string
-  _type: 'settings'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title: string
-  description?: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal'
-    listItem?: never
-    markDefs?: Array<{
-      linkType?: 'href' | 'page' | 'post'
-      href?: string
-      page?: PageReference
-      post?: PostReference
-      openInNewTab?: boolean
-      _type: 'link'
-      _key: string
-    }>
-    level?: number
-    _type: 'block'
-    _key: string
-  }>
-  ogImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    metadataBase?: string
-    _type: 'image'
-  }
-}
-
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top: number
-  bottom: number
-  left: number
-  right: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x: number
-  y: number
-  height: number
-  width: number
-}
-
 export type Page = {
   _id: string
   _type: 'page'
@@ -189,8 +133,25 @@ export type Page = {
   _rev: string
   name: string
   slug: Slug
-  heading: string
-  subheading?: string
+  seo?: {
+    title?: string
+    description?: string
+    canonical?: string
+    noIndex?: boolean
+    noFollow?: boolean
+    hideFromSitemap?: boolean
+    ogImage?: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: 'image'
+    }
+    ogTitle?: string
+    ogDescription?: string
+    keywords?: Array<string>
+  }
   pageBuilder?: Array<
     | ({
         _key: string
@@ -248,10 +209,143 @@ export type Person = {
   }
 }
 
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top: number
+  bottom: number
+  left: number
+  right: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x: number
+  y: number
+  height: number
+  width: number
+}
+
 export type Slug = {
   _type: 'slug'
   current: string
   source?: string
+}
+
+export type Settings = {
+  _id: string
+  _type: 'settings'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  branding?: {
+    siteTitle: string
+    logo?: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      _type: 'image'
+    }
+  }
+  seo?: {
+    title?: string
+    description?: string
+    metadataBase?: string
+    ogImage?: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: 'image'
+    }
+    twitterHandle?: string
+    robots?: {
+      index?: boolean
+      follow?: boolean
+    }
+  }
+  nav?: {
+    items?: Array<
+      {
+        _key: string
+      } & NavItem
+    >
+    cta?: NavCta
+  }
+  footer?: {
+    columns?: Array<
+      {
+        _key: string
+      } & FooterColumn
+    >
+    social?: Array<
+      {
+        _key: string
+      } & SocialLink
+    >
+    legal?: Array<
+      {
+        _key: string
+      } & LegalLink
+    >
+    copyright?: string
+  }
+  theme?: {
+    colorScheme: 'jw-orange-black' | 'blue-white' | 'black-white' | 'green-charcoal' | 'purple-dark'
+    mode: 'light' | 'dark' | 'system'
+    accent: 'solid' | 'outline' | 'soft'
+    headingFont: 'inter' | 'poppins' | 'montserrat' | 'playfair'
+    bodyFont: 'inter' | 'roboto' | 'opensans'
+    monoFont: 'ibmplexmono' | 'jetbrainsmono' | 'spacemono'
+    radius: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+    buttonStyle: 'pill' | 'rounded' | 'square'
+    container?: 'default' | 'wide' | 'narrow'
+  }
+}
+
+export type NavCta = {
+  _type: 'navCta'
+  label: string
+  link: Link
+  variant?: 'primary' | 'secondary'
+}
+
+export type LegalLink = {
+  _type: 'legalLink'
+  label: string
+  link: Link
+}
+
+export type SocialLink = {
+  _type: 'socialLink'
+  platform: string
+  url: string
+}
+
+export type FooterColumn = {
+  _type: 'footerColumn'
+  title: string
+  links?: Array<{
+    label: string
+    link: Link
+    _type: 'footerLink'
+    _key: string
+  }>
+}
+
+export type NavItem = {
+  _type: 'navItem'
+  label: string
+  kind: 'link' | 'dropdown'
+  link?: Link
+  children?: Array<{
+    label: string
+    description?: string
+    link: Link
+    _type: 'navChild'
+    _key: string
+  }>
 }
 
 export type SanityAssistInstructionTask = {
@@ -497,14 +591,19 @@ export type AllSanitySchemaTypes =
   | BlockContentTextOnly
   | BlockContent
   | Button
-  | Settings
-  | SanityImageCrop
-  | SanityImageHotspot
   | Page
   | PersonReference
   | Post
   | Person
+  | SanityImageCrop
+  | SanityImageHotspot
   | Slug
+  | Settings
+  | NavCta
+  | LegalLink
+  | SocialLink
+  | FooterColumn
+  | NavItem
   | SanityAssistInstructionTask
   | SanityAssistTaskStatus
   | SanityAssistSchemaTypeAnnotations
@@ -529,7 +628,7 @@ export type AllSanitySchemaTypes =
 
 export declare const internalGroqTypeReferenceTo: unique symbol
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: settingsQuery
 // Query: *[_type == "settings"][0]
 export type SettingsQueryResult = {
@@ -538,41 +637,74 @@ export type SettingsQueryResult = {
   _createdAt: string
   _updatedAt: string
   _rev: string
-  title: string
-  description?: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal'
-    listItem?: never
-    markDefs?: Array<{
-      linkType?: 'href' | 'page' | 'post'
-      href?: string
-      page?: PageReference
-      post?: PostReference
-      openInNewTab?: boolean
-      _type: 'link'
-      _key: string
-    }>
-    level?: number
-    _type: 'block'
-    _key: string
-  }>
-  ogImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
+  branding?: {
+    siteTitle: string
+    logo?: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      _type: 'image'
+    }
+  }
+  seo?: {
+    title?: string
+    description?: string
     metadataBase?: string
-    _type: 'image'
+    ogImage?: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: 'image'
+    }
+    twitterHandle?: string
+    robots?: {
+      index?: boolean
+      follow?: boolean
+    }
+  }
+  nav?: {
+    items?: Array<
+      {
+        _key: string
+      } & NavItem
+    >
+    cta?: NavCta
+  }
+  footer?: {
+    columns?: Array<
+      {
+        _key: string
+      } & FooterColumn
+    >
+    social?: Array<
+      {
+        _key: string
+      } & SocialLink
+    >
+    legal?: Array<
+      {
+        _key: string
+      } & LegalLink
+    >
+    copyright?: string
+  }
+  theme?: {
+    colorScheme: 'black-white' | 'blue-white' | 'green-charcoal' | 'jw-orange-black' | 'purple-dark'
+    mode: 'dark' | 'light' | 'system'
+    accent: 'outline' | 'soft' | 'solid'
+    headingFont: 'inter' | 'montserrat' | 'playfair' | 'poppins'
+    bodyFont: 'inter' | 'opensans' | 'roboto'
+    monoFont: 'ibmplexmono' | 'jetbrainsmono' | 'spacemono'
+    radius: '2xl' | 'lg' | 'md' | 'none' | 'sm' | 'xl'
+    buttonStyle: 'pill' | 'rounded' | 'square'
+    container?: 'default' | 'narrow' | 'wide'
   }
 } | null
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: getPageQuery
 // Query: *[_type == 'page' && slug.current == $slug][0]{    _id,    _type,    name,    slug,    heading,    subheading,    "pageBuilder": pageBuilder[]{      ...,      _type == "callToAction" => {        ...,        button {          ...,            link {      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }      }        }      },      _type == "infoSection" => {        content[]{          ...,          markDefs[]{            ...,              _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }          }        }      },    },  }
 export type GetPageQueryResult = {
@@ -580,8 +712,8 @@ export type GetPageQueryResult = {
   _type: 'page'
   name: string
   slug: Slug
-  heading: string
-  subheading: string | null
+  heading: null
+  subheading: null
   pageBuilder: Array<
     | {
         _key: string
@@ -594,7 +726,7 @@ export type GetPageQueryResult = {
           buttonText?: string
           link: {
             _type: 'link'
-            linkType?: 'href' | 'page' | 'post'
+            linkType: 'href' | 'page' | 'post'
             href?: string
             page: string | null
             post: string | null
@@ -653,7 +785,7 @@ export type GetPageQueryResult = {
   > | null
 } | null
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: sitemapData
 // Query: *[_type == "page" || _type == "post" && defined(slug.current)] | order(_type asc) {    "slug": slug.current,    _type,    _updatedAt,  }
 export type SitemapDataResult = Array<
@@ -669,7 +801,7 @@ export type SitemapDataResult = Array<
     }
 >
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: allPostsQuery
 // Query: *[_type == "post" && defined(slug.current)] | order(date desc, _updatedAt desc) {      _id,  "status": select(_originalId in path("drafts.**") => "draft", "published"),  "title": coalesce(title, "Untitled"),  "slug": slug.current,  excerpt,  coverImage,  "date": coalesce(date, _updatedAt),  "author": author->{firstName, lastName, picture},  }
 export type AllPostsQueryResult = Array<{
@@ -701,7 +833,7 @@ export type AllPostsQueryResult = Array<{
   } | null
 }>
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: morePostsQuery
 // Query: *[_type == "post" && _id != $skip && defined(slug.current)] | order(date desc, _updatedAt desc) [0...$limit] {      _id,  "status": select(_originalId in path("drafts.**") => "draft", "published"),  "title": coalesce(title, "Untitled"),  "slug": slug.current,  excerpt,  coverImage,  "date": coalesce(date, _updatedAt),  "author": author->{firstName, lastName, picture},  }
 export type MorePostsQueryResult = Array<{
@@ -733,7 +865,7 @@ export type MorePostsQueryResult = Array<{
   } | null
 }>
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: postQuery
 // Query: *[_type == "post" && slug.current == $slug] [0] {    content[]{    ...,    markDefs[]{      ...,        _type == "link" => {    "page": page->slug.current,    "post": post->slug.current  }    }  },      _id,  "status": select(_originalId in path("drafts.**") => "draft", "published"),  "title": coalesce(title, "Untitled"),  "slug": slug.current,  excerpt,  coverImage,  "date": coalesce(date, _updatedAt),  "author": author->{firstName, lastName, picture},  }
 export type PostQueryResult = {
@@ -798,14 +930,14 @@ export type PostQueryResult = {
   } | null
 } | null
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: postPagesSlugs
 // Query: *[_type == "post" && defined(slug.current)]  {"slug": slug.current}
 export type PostPagesSlugsResult = Array<{
   slug: string
 }>
 
-// Source: sanity/lib/queries.ts
+// Source: sanity\lib\queries.ts
 // Variable: pagesSlugs
 // Query: *[_type == "page" && defined(slug.current)]  {"slug": slug.current}
 export type PagesSlugsResult = Array<{

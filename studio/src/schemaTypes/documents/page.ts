@@ -1,11 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
 
-/**
- * Page schema.  Define and edit the fields for the 'page' content type.
- * Learn more: https://www.sanity.io/docs/studio/schema-types
- */
-
 export const page = defineType({
   name: 'page',
   title: 'Page',
@@ -30,16 +25,115 @@ export const page = defineType({
       },
     }),
     defineField({
-      name: 'heading',
-      title: 'Heading',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
+      name: 'seo',
+      title: 'SEO',
+      type: 'object',
+      options: {collapsible: true, collapsed: true},
+      fields: [
+        defineField({
+          name: 'title',
+          title: 'Meta Title',
+          type: 'string',
+          description: 'Recommended: 50–60 characters.',
+          validation: (Rule) =>
+            Rule.custom((value) => {
+              if (!value) return true
+              if (value.length > 70) return 'Try to keep the title under ~70 characters'
+              return true
+            }),
+        }),
+        defineField({
+          name: 'description',
+          title: 'Meta Description',
+          type: 'text',
+          rows: 3,
+          description: 'Recommended: 140–160 characters.',
+          validation: (Rule) =>
+            Rule.custom((value) => {
+              if (!value) return true
+              if (value.length > 180) return 'Try to keep the description under ~180 characters'
+              return true
+            }),
+        }),
+
+        defineField({
+          name: 'canonical',
+          title: 'Canonical URL (optional)',
+          type: 'url',
+          description:
+            'Leave blank to use the default URL based on slug. Use only if you know you need a custom canonical.',
+        }),
+
+        defineField({
+          name: 'noIndex',
+          title: 'No index',
+          type: 'boolean',
+          initialValue: false,
+          description: 'Prevents search engines from indexing this page.',
+        }),
+        defineField({
+          name: 'noFollow',
+          title: 'No follow',
+          type: 'boolean',
+          initialValue: false,
+          description: 'Tells search engines not to follow links on this page.',
+        }),
+
+        defineField({
+          name: 'hideFromSitemap',
+          title: 'Hide from sitemap',
+          type: 'boolean',
+          initialValue: false,
+          description: 'Useful for thank-you pages, experiments, or temporary landing pages.',
+        }),
+
+        defineField({
+          name: 'ogImage',
+          title: 'Social Share Image (OG)',
+          type: 'image',
+          options: {hotspot: true},
+          fields: [
+            defineField({
+              name: 'alt',
+              title: 'Alt text',
+              type: 'string',
+              description: 'Important for accessibility and SEO.',
+              validation: (Rule) =>
+                Rule.custom((alt, ctx) => {
+                  const hasAsset = Boolean((ctx.parent as any)?.asset?._ref)
+                  if (hasAsset && !alt) return 'Alt text is required when an image is set'
+                  return true
+                }),
+            }),
+          ],
+        }),
+
+        defineField({
+          name: 'ogTitle',
+          title: 'OG Title (optional)',
+          type: 'string',
+          description: 'Overrides Meta Title for social sharing. Leave blank to use Meta Title.',
+        }),
+        defineField({
+          name: 'ogDescription',
+          title: 'OG Description (optional)',
+          type: 'text',
+          rows: 2,
+          description:
+            'Overrides Meta Description for social sharing. Leave blank to use Meta Description.',
+        }),
+
+        defineField({
+          name: 'keywords',
+          title: 'Keywords (optional)',
+          type: 'array',
+          of: [{type: 'string'}],
+          description:
+            'Not a major ranking factor today, but can be useful for internal consistency.',
+        }),
+      ],
     }),
-    defineField({
-      name: 'subheading',
-      title: 'Subheading',
-      type: 'string',
-    }),
+
     defineField({
       name: 'pageBuilder',
       title: 'Page builder',
@@ -47,7 +141,6 @@ export const page = defineType({
       of: [{type: 'callToAction'}, {type: 'infoSection'}],
       options: {
         insertMenu: {
-          // Configure the "Add Item" menu to display a thumbnail preview of the content type. https://www.sanity.io/docs/studio/array-type#efb1fe03459d
           views: [
             {
               name: 'grid',

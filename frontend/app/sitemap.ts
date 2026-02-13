@@ -15,9 +15,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const headersList = await headers()
   const sitemap: MetadataRoute.Sitemap = []
   const domain: string = headersList.get('host') as string
+  const homepage = allPostsAndPages.data.find(
+    (p: any) => p._type === 'page' && p.slug === 'homepage',
+  )
   sitemap.push({
-    url: domain as string,
-    lastModified: new Date(),
+    url: `https://${domain}`,
+    lastModified: homepage?._updatedAt || new Date(),
     priority: 1,
     changeFrequency: 'monthly',
   })
@@ -36,6 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let url: string
 
     for (const p of allPostsAndPages.data) {
+      if (p.slug === 'homepage') continue
       switch (p._type) {
         case 'page':
           priority = 0.8

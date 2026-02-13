@@ -4,13 +4,12 @@ import {SpeedInsights} from '@vercel/speed-insights/next'
 import type {Metadata} from 'next'
 import {Inter, IBM_Plex_Mono} from 'next/font/google'
 import {draftMode} from 'next/headers'
-import {toPlainText} from 'next-sanity'
 import {VisualEditing} from 'next-sanity/visual-editing'
 import {Toaster} from 'sonner'
 
 import DraftModeToast from '@/app/components/DraftModeToast'
-import Footer from '@/app/components/Footer'
-import Header from '@/app/components/Header'
+import Footer from '@/app/components/Footer/Footer'
+import Header from '@/app/components/NavBar/Header'
 import * as demo from '@/sanity/lib/demo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
 import {settingsQuery} from '@/sanity/lib/queries'
@@ -18,34 +17,37 @@ import {resolveOpenGraphImage} from '@/sanity/lib/utils'
 import {handleError} from '@/app/client-utils'
 
 /**
- * Generate metadata for the page.
- * Learn more: https://nextjs.org/docs/app/api-reference/functions/generate-metadata#generatemetadata-function
+ * Generate metadata for the site (global defaults).
  */
 export async function generateMetadata(): Promise<Metadata> {
   const {data: settings} = await sanityFetch({
     query: settingsQuery,
-    // Metadata should never contain stega
     stega: false,
   })
-  const title = settings?.title || demo.title
-  const description = settings?.description || demo.description
+
+  // New settings shape
+  const siteTitle = settings?.siteTitle || demo.title
+  const defaultSeoTitle = settings?.defaultSeo?.title || siteTitle
+  const defaultSeoDescription = settings?.defaultSeo?.description || ''
 
   const ogImage = resolveOpenGraphImage(settings?.ogImage)
-  let metadataBase: URL | undefined = undefined
+
+  let metadataBase: URL | undefined
   try {
     metadataBase = settings?.ogImage?.metadataBase
       ? new URL(settings.ogImage.metadataBase)
       : undefined
   } catch {
-    // ignore
+    metadataBase = undefined
   }
+
   return {
     metadataBase,
     title: {
-      template: `%s | ${title}`,
-      default: title,
+      template: `%s | ${siteTitle}`,
+      default: defaultSeoTitle,
     },
-    description: toPlainText(description),
+    description: defaultSeoDescription,
     openGraph: {
       images: ogImage ? [ogImage] : [],
     },
@@ -68,24 +70,33 @@ const ibmPlexMono = IBM_Plex_Mono({
 export default async function RootLayout({children}: {children: React.ReactNode}) {
   const {isEnabled: isDraftMode} = await draftMode()
 
+  // ✅ Fetch settings once server-side for nav/footer
+  const {data: settings} = await sanityFetch({
+    query: settingsQuery,
+    // If you want nav/footer to reflect drafts while in draft mode:
+    perspective: isDraftMode ? 'previewDrafts' : 'published',
+    stega: false,
+  })
+
   return (
     <html lang="en" className={`${inter.variable} ${ibmPlexMono.variable} bg-white text-black`}>
       <body>
         <section className="min-h-screen pt-24">
-          {/* The <Toaster> component is responsible for rendering toast notifications used in /app/client-utils.ts and /app/components/DraftModeToast.tsx */}
           <Toaster />
+
           {isDraftMode && (
             <>
               <DraftModeToast />
-              {/*  Enable Visual Editing, only to be rendered when Draft Mode is enabled */}
               <VisualEditing />
             </>
           )}
-          {/* The <SanityLive> component is responsible for making all sanityFetch calls in your application live, so should always be rendered. */}
+
           <SanityLive onError={handleError} />
-          <Header />
-          <main className="">{children}</main>
-          <Footer />
+
+          {/* ✅ Pass nav/footer data down */}
+          <Header nav={settings?.nav} siteTitle={settings?.siteTitle} />
+          <main>{children}</main>
+          <Footer footer={settings?.footer} />
         </section>
         <SpeedInsights />
       </body>
